@@ -34,7 +34,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Navbar />
+        <Navbar user={user}/>
         <div className="content">
          <Routes>
             <Route path="/" element={<Home />} />
