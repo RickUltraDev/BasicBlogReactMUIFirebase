@@ -18,15 +18,14 @@ import 'react-toastify/dist/ReactToastify.css';
 
 /* Component imports */
 import { useState, useEffect } from 'react';
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 
 
-const defaultTheme = createTheme();
-
-const Login = () => {
+const Login = ({ user }) => {
     //UseStates vars
+    const defaultTheme = createTheme();
     const navigate = useNavigate(); //for v6 of react router is better useNavigate
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -46,7 +45,8 @@ const Login = () => {
         .then((userCredential) => {
             // If we want to do something with the user data --> const user = userCredential.user;
             //NOTE: Here i can save the first name and last name
-            const user = userCredential.user;
+            //const user = userCredential.user;
+            notify("Success", "User created!");
             handlePageChange();
         })
         .catch((error) => {
@@ -114,6 +114,7 @@ const Login = () => {
         setIsSignUpActive(!isSignUpActive);
     }
     
+    //validation of form
     useEffect(() => {
         let regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
         
@@ -140,8 +141,14 @@ const Login = () => {
                 message:""
             });
         }
-    }, [email, password]);
+        //If a user is logged navigate to /Profile
+        if (user) {
+            navigate('/profile');
+        }
 
+    }, [email, password, user, navigate]);
+
+    
 
     return ( 
         <ThemeProvider theme={defaultTheme}>
