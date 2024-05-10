@@ -6,6 +6,8 @@ import NotFound from './components/NotFound';
 import Home from './components/Home';
 import Login from './components/Login';
 import Profile from './components/Profile';
+import Skill from './components/Skill';
+
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -42,7 +44,12 @@ function App() {
             <Route path="/login" element={<Login user={user}/>} />
             <Route path="/profile" element={
               <ProtectedRoute user={user}>
-                <Profile/>
+                <Profile user={user}/>
+              </ProtectedRoute>
+            } />
+            <Route path="/skill" element={
+              <ProtectedRoute user={user}>
+                <Skill user={user}/>
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
