@@ -10,8 +10,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 /* Firebase imports */
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { firebaseApp } from "./firebase"; //var to use firebase capacities been authenticated
+const auth = getAuth(firebaseApp);
 
 function App() {
   //UseStates vars
