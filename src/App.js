@@ -42,7 +42,7 @@ function App() {
             <Route path="/login" element={<Login user={user}/>} />
             <Route path="/profile" element={
               <ProtectedRoute user={user}>
-                <Profile/>
+                <Profile user={user}/>
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
