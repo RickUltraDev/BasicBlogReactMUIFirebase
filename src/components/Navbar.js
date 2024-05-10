@@ -14,7 +14,6 @@ import MenuItem from '@mui/material/MenuItem';
 import RssFeedIcon from '@mui/icons-material/RssFeed';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import SettingsIcon from '@mui/icons-material/Settings';
 
 /* Component imports */
 import { useNavigate} from "react-router-dom";
@@ -209,9 +208,6 @@ const Navbar = ({ user }) => {
                         >
                             <MenuItem onClick={handleLoginRedirect}>
                                 <AccountBoxIcon fontSize="small"  sx={{ pr: '5px' }}/> Profile
-                            </MenuItem>
-                            <MenuItem>
-                                <SettingsIcon fontSize="small"  sx={{ pr: '5px' }}/> Settings
                             </MenuItem>
                             <MenuItem onClick={handleSignOut}>
                                 <LogoutIcon fontSize="small" sx={{ pr: '5px' }} /> Logout

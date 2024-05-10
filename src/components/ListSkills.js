@@ -8,7 +8,28 @@ import Stack from '@mui/material/Stack';
 /* Component imports */
 import { Fragment } from 'react';
 
-const ListSkills = ({ arrSkills }) => {
+/* Firebase imports */
+import { firebaseApp } from "../firebase"; 
+import { getFirestore, updateDoc, doc } from 'firebase/firestore';
+const fireStore = getFirestore(firebaseApp);
+
+const ListSkills = ({ arrSkills, setArrSkills, userUid }) => {
+    //useStates vars
+
+    //functions
+    const handleRemoveSkill = async (skillId) => {
+        try {
+            const arrSkillsNew = arrSkills.filter((skill)=> skill.id !== skillId);
+            const docuRef = doc(fireStore, `userData/${userUid}`);
+            updateDoc(docuRef, {skills: [...arrSkillsNew]});
+            setArrSkills(arrSkillsNew);
+            
+        } catch (error) {
+            console.error("Error adding document: ", error);
+        }
+    }
+
+
     return ( 
         <Paper
             sx={{
@@ -41,7 +62,7 @@ const ListSkills = ({ arrSkills }) => {
                                     <Button variant="outlined" color="warning">
                                         Edit
                                     </Button>
-                                    <Button variant="outlined" color="error">
+                                    <Button onClick={() => handleRemoveSkill(skill.id)} variant="outlined" color="error">
                                         Remove
                                     </Button>
                                 </Stack>

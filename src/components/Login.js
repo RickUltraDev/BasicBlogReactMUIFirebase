@@ -24,7 +24,7 @@ import debounce from 'debounce';
 /* Firebase imports */
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-import { firebaseApp } from "../firebase"; //var to use firebase capacities been authenticated
+import { firebaseApp } from "../firebase";
 const auth = getAuth(firebaseApp);
 const fireStore = getFirestore(firebaseApp);
 
@@ -146,8 +146,8 @@ const Login = ({ user }) => {
     }
 
     //Debounce vars
-    const debouncedSignInHandler = debounce(handleSignIn, 1500, {maxWait: 2000});
-    const debouncedSignUpHandler = debounce(handleSignUp, 1500, {maxWait: 2000});
+    const debouncedSignInHandler = debounce(handleSignIn, 1000, {maxWait: 2000});
+    const debouncedSignUpHandler = debounce(handleSignUp, 1000, {maxWait: 2000});
     
     //validation of form
     useEffect(() => {
