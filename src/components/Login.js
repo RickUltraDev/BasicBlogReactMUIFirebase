@@ -19,14 +19,22 @@ import 'react-toastify/dist/ReactToastify.css';
 /* Component imports */
 import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import debounce from 'debounce';
+
+/* Firebase imports */
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { firebaseApp } from "../firebase"; //var to use firebase capacities been authenticated
+const auth = getAuth(firebaseApp);
+const fireStore = getFirestore(firebaseApp);
 
 
 const Login = ({ user }) => {
     //UseStates vars
     const defaultTheme = createTheme();
     const navigate = useNavigate(); //for v6 of react router is better useNavigate
+    const [fName, setFName] = useState("");
+    const [lName, setLName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errEmail, setErrEmail] = useState({
@@ -37,16 +45,24 @@ const Login = ({ user }) => {
         status: false,
         message: ""
     });
-    const [isSignUpActive, setIsSignUpActive] = useState(false);
+    const [errFName, setErrFName] = useState({
+        status: false,
+        message: ""
+    });
+    const [errLName, setErrLName] = useState({
+        status: false,
+        message: ""
+    });
 
+    const [isSignUpActive, setIsSignUpActive] = useState(false);
+    
     //functions
-    const handleSignUp = () => {
-        createUserWithEmailAndPassword(auth, email, password)
+    const handleSignUp = async () => {
+        await createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-            // If we want to do something with the user data --> const user = userCredential.user;
-            //NOTE: Here i can save the first name and last name
-            //const user = userCredential.user;
-            notify("Success", "User created!");
+            // Grabbing user data like fname and lname and save it on firestore
+            const user = userCredential.user;
+            handleNewUserData(fName,lName,user.uid);
             handlePageChange();
         })
         .catch((error) => {
@@ -56,8 +72,8 @@ const Login = ({ user }) => {
         });
     }
 
-    const handleSignIn = () => {
-        signInWithEmailAndPassword(auth, email, password)
+    const handleSignIn = async () => {
+        await signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             navigate('/profile');
         })
@@ -67,7 +83,22 @@ const Login = ({ user }) => {
             notify("Warning", errorMessage);
         });
     }
-    
+
+    const handleNewUserData = async (fNameUser, lNameUser, uidUser) => {
+        try {
+            const docuRef = doc(fireStore, `userData/${uidUser}`);
+            const docSearch = await getDoc(docuRef);
+            if (!docSearch.exists()) {
+                await setDoc(docuRef, {
+                    fName: fNameUser,
+                    lName: lNameUser
+                });
+            }
+        } catch (error) {
+            console.error("Error adding document: ", error);
+        }
+    }
+
     const notify = (status, message) => {
         if (status === "Error") {
             toast.error(message, {
@@ -113,6 +144,10 @@ const Login = ({ user }) => {
     const handlePageChange = () => {
         setIsSignUpActive(!isSignUpActive);
     }
+
+    //Debounce vars
+    const debouncedSignInHandler = debounce(handleSignIn, 1500, {maxWait: 2000});
+    const debouncedSignUpHandler = debounce(handleSignUp, 1500, {maxWait: 2000});
     
     //validation of form
     useEffect(() => {
@@ -141,12 +176,37 @@ const Login = ({ user }) => {
                 message:""
             });
         }
+
+        if (!!fName && ( fName.length < 2 || fName.length > 60) ) {
+            setErrFName({
+                status:true,
+                message:"This is an invalid first name, try between 2 to 60 caracters."
+            });
+        }else{
+            setErrFName({
+                status:false,
+                message:""
+            });
+        }
+
+        if (!!lName && (lName.length < 2 || lName.length > 60) ) {
+            setErrLName({
+                status:true,
+                message:"This is an invalid last name, try between 2 to 60 caracters."
+            });
+        }else{
+            setErrLName({
+                status:false,
+                message:""
+            });
+        }
+
         //If a user is logged navigate to /Profile
         if (user) {
             navigate('/profile');
         }
 
-    }, [email, password, user, navigate]);
+    }, [email, password, fName, lName, user, navigate]);
 
     
 
@@ -184,30 +244,64 @@ const Login = ({ user }) => {
                     }
 
 
-                    <Box component="form" noValidate sx={{ mt: 1 }}>
-                        <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        label="Email Address"
-                        type="text"
-                        autoComplete="email"
-                        autoFocus
-                        error={errEmail.status}
-                        helperText={errEmail.message}
-                        onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        label="Password"
-                        type="password"
-                        autoComplete="current-password"
-                        error={errPassword.status}
-                        helperText={errPassword.message}
-                        onChange={(e) => setPassword(e.target.value)}
-                        />
+                    <Box component="form" noValidate sx={{ mt: 3 }}>
+                        <Grid container spacing={2}>
+                            {isSignUpActive && 
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                    autoComplete="given-name"
+                                    required
+                                    fullWidth
+                                    label="First Name"
+                                    autoFocus
+                                    error={errFName.status}
+                                    helperText={errFName.message}
+                                    onChange={(e) => setFName(e.target.value)}
+                                    />
+                                </Grid>
+                            }
+                            {isSignUpActive && 
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                    required
+                                    fullWidth
+                                    label="Last Name"
+                                    autoComplete="family-name"
+                                    error={errLName.status}
+                                    helperText={errLName.message}
+                                    onChange={(e) => setLName(e.target.value)}
+                                    />
+                                </Grid>
+                            }
+                            <Grid item xs={12}>
+                                <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                label="Email Address"
+                                type="text"
+                                autoComplete="email"
+                                autoFocus
+                                error={errEmail.status}
+                                helperText={errEmail.message}
+                                onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                label="Password"
+                                type="password"
+                                autoComplete="current-password"
+                                error={errPassword.status}
+                                helperText={errPassword.message}
+                                onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </Grid>
+                        </Grid>  
 
                         {!isSignUpActive &&
                             <Button
@@ -215,7 +309,7 @@ const Login = ({ user }) => {
                             fullWidth
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
-                            onClick={handleSignIn}
+                            onClick={debouncedSignInHandler}
                             disabled={ (!email || !password || errEmail.status || errPassword.status) ? true : false }
                             >
                             Sign In
@@ -228,8 +322,8 @@ const Login = ({ user }) => {
                             fullWidth
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
-                            onClick={handleSignUp}
-                            disabled={ (!email || !password || errEmail.status || errPassword.status) ? true : false }
+                            onClick={debouncedSignUpHandler}
+                            disabled={ (!email || !password || !fName || !lName || errFName.status || errLName.status || errEmail.status || errPassword.status) ? true : false }
                             >
                             Create account
                             </Button>

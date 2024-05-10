@@ -20,18 +20,20 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { useNavigate} from "react-router-dom";
 import { useState, useEffect, useRef } from 'react';
 
-/* Firebase imports */
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
-
 /* Toast imports */
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+/* Firebase imports */
+import { getAuth, signOut } from "firebase/auth";
+import { firebaseApp } from "../firebase"; //var to use firebase capacities been authenticated
+const auth = getAuth(firebaseApp);
+
+
 const Navbar = ({ user }) => {
     //UseStates vars
     const navigate = useNavigate(); //for v6 of react router is better useNavigate
-    const pages = ['Home','Posts', 'Stats', 'Comments'];
+    const pages = ['Home','News', 'Trending'];
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const [isUserLogged, setIsUserLogged] = useState(false);
@@ -47,8 +49,8 @@ const Navbar = ({ user }) => {
         handleCloseNavMenu();
         navigate('/');
     }
-    const handleSignOut = () =>{
-        signOut(auth)
+    const handleSignOut = async () =>{
+        await signOut(auth)
         .catch((error) => {
             //If we have any error we will have it here
             const errorMessage = error.message;
