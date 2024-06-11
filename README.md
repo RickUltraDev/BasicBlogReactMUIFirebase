@@ -10,3 +10,7 @@ A React-firebase exercise as an SPA for adding different profiles with skills us
 5. Debes hacer deploy de la página usando firebase hosting
 6. El proyecto de firebase se debe llamar ricardoherrera-softtek
 7. Crear un repositorio de github privado con el mismo nombre y agregarme como colaborador para revisarlo jorgebibarra
+
+## Deployment of exercise with firebase hosting
+
+Eg. [Click here](https://ricardoherrera-softtek-385a9.web.app/login)
